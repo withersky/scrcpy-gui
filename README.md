@@ -15,10 +15,6 @@ A simple PySide6 graphical interface for managing ADB WiFi connections and contr
 - **Multilingual**: Supports English and Russian interfaces
 - **Cross-platform**: Works on Linux (Windows support planned)
 
-## Screenshots
-
-![Screenshot](screenshots/screenshot.png)
-
 ## Requirements
 
 - Python 3.6 or higher
