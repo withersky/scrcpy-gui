@@ -47,12 +47,7 @@ A simple PySide6 graphical interface for managing ADB WiFi connections and contr
    pip install PySide6
    ```
 
-3. Ensure ADB and Scrcpy are installed on your system:
-   - Ubuntu/Debian: `sudo apt install android-tools-adb scrcpy`
-   - Arch Linux: `sudo pacman -S android-tools scrcpy`
-   - Or download from [Android SDK Platform Tools](https://developer.android.com/studio/releases/platform-tools) and [Scrcpy](https://github.com/Genymobile/scrcpy)
-
-4. Run the application:
+3. Run the application:
    ```bash
    python3 scrcpy_gui.py
    ```
