@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e
+
+# Remove symlink on package removal
+rm -f /usr/local/bin/scrcpy-gui
+
+# Remove desktop file
+rm -f /usr/share/applications/scrcpy-gui.desktop
+
+# Update desktop database
+update-desktop-database /usr/share/applications/ 2>/dev/null || true
+
+echo "Scrcpy GUI removed."

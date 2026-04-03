@@ -1,0 +1,103 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: |
+      startsWith(github.event.head_commit.message, 'v') &&
+      contains(github.event.head_commit.message, '.')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Extract version from commit message
+      id: get_version
+      run: |
+        # Extract version from the first line of commit message (e.g., "v1.3.0 - description")
+        COMMIT_MSG="${{ github.event.head_commit.message }}"
+        VERSION=$(echo "$COMMIT_MSG" | head -1 | grep -oP '^v\K[0-9]+\.[0-9]+\.[0-9]+')
+        if [ -z "$VERSION" ]; then
+          echo "No version found in commit message. Expected format: vX.Y.Z"
+          exit 1
+        fi
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "Extracted version: $VERSION"
+
+    - name: Check if tag already exists
+      id: check_tag
+      run: |
+        if git rev-parse "v${{ steps.get_version.outputs.VERSION }}" >/dev/null 2>&1; then
+          echo "TAG_EXISTS=true" >> $GITHUB_OUTPUT
+        else
+          echo "TAG_EXISTS=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Set up build dependencies
+      if: steps.check_tag.outputs.TAG_EXISTS == 'false'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y dpkg-dev
+
+    - name: Build DEB package
+      if: steps.check_tag.outputs.TAG_EXISTS == 'false'
+      run: |
+        chmod +x build-deb.sh
+        
+        # Update version in build script
+        sed -i "s/PACKAGE_VERSION=\".*\"/PACKAGE_VERSION=\"${{ steps.get_version.outputs.VERSION }}\"/" build-deb.sh
+        
+        # Update version in debian control file
+        sed -i "s/Version: .*/Version: ${{ steps.get_version.outputs.VERSION }}/" debian/DEBIAN/control
+        
+        # Build the package
+        ./build-deb.sh
+
+    - name: Create Git tag
+      if: steps.check_tag.outputs.TAG_EXISTS == 'false'
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git tag -a "v${{ steps.get_version.outputs.VERSION }}" -m "Release v${{ steps.get_version.outputs.VERSION }}"
+        git push origin "v${{ steps.get_version.outputs.VERSION }}"
+
+    - name: Create Release
+      if: steps.check_tag.outputs.TAG_EXISTS == 'false'
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ steps.get_version.outputs.VERSION }}
+        name: Release v${{ steps.get_version.outputs.VERSION }}
+        body: |
+          ## Changes in v${{ steps.get_version.outputs.VERSION }}
+          
+          Automated release build.
+          
+          ### Installation
+          
+          Download the `.deb` package and install:
+          ```bash
+          sudo dpkg -i scrcpy-gui_${{ steps.get_version.outputs.VERSION }}_all.deb
+          sudo apt-get install -f
+          ```
+          
+          ### Commit
+          
+          ${{ github.event.head_commit.message }}
+        draft: false
+        prerelease: false
+        files: |
+          scrcpy-gui_${{ steps.get_version.outputs.VERSION }}_all.deb
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

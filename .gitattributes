@@ -1,0 +1,22 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Explicitly declare text files
+*.py text
+*.sh text
+*.md text
+*.txt text
+*.desktop text
+*.yml text
+*.1 text diff=man
+
+# Denote all files that are truly binary and should not be modified
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+adb binary
+scrcpy binary
+scrcpy-server binary
+*.jar binary

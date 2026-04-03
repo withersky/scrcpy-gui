@@ -1,0 +1,15 @@
+#!/bin/bash
+set -e
+
+# Create symlink for scrcpy-gui command
+ln -sf /opt/scrcpy-gui/scrcpy_gui.py /usr/local/bin/scrcpy-gui
+
+# Install desktop file
+cp /opt/scrcpy-gui/scrcpy-gui.desktop /usr/share/applications/
+
+# Update desktop database
+update-desktop-database /usr/share/applications/ 2>/dev/null || true
+
+echo "Scrcpy GUI installed successfully!"
+echo "Run 'scrcpy-gui' to start the application."
+echo "Or find it in your applications menu."

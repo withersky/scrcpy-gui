@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Scrcpy GUI
+Comment=ADB WiFi Manager and Scrcpy Control
+Exec=/opt/scrcpy-gui/scrcpy_gui.py
+Icon=/opt/scrcpy-gui/icon.png
+Terminal=false
+Categories=Utility;Development;
+Keywords=android;adb;scrcpy;screen;mirror;
